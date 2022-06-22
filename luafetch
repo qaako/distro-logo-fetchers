@@ -1,0 +1,102 @@
+#!/bin/lua
+
+-- Colors
+clr_NC = "\27[0m"
+clr_UL = "\27[0;4m"
+clr_D = "\27[38;5;33m"
+
+-- Basic
+SHELL = os.getenv("SHELL")
+USER = os.getenv("USER")
+TERM = os.getenv("TERM")
+cmd = "ps -u" .. USER .. "-o comm --no-headers"
+
+DE = "Feature coming soon"
+
+-- Model
+if io.open("/sys/devices/virtual/dmi/id/board_vendor", "r") then
+	zsp = io.open("/sys/devices/virtual/dmi/id/board_vendor", "r")
+	zs = zsp:read("*a")
+end
+if io.open("/sys/devices/virtual/dmi/id/board_name") then
+	zwp = io.open("/sys/devices/virtual/dmi/id/board_name")
+	zw = zwp:read("*a")
+end
+preMODEL = zs .. zw
+MODEL = preMODEL:gsub("\n", " ")
+
+-- Distro
+zxp = io.open("/etc/os-release", "r")
+zx = zxp:read("*a")
+if string.match(zx, ".+Arch Linux.+") then
+	Distro = "Arch Linux"
+elseif string.match(zx, ".+Debian.+") then
+	Distro = "Debian"
+elseif string.match(zx, ".+Gentoo.+") then
+	Distro = "Gentoo"
+elseif string.match(zx, ".+Ubuntu.+") then
+	Distro = "Ubuntu"
+elseif string.match(zx, ".+Mint.+") then
+	Distro = "Mint"
+elseif string.match(zx, ".+SUSE.+") then
+	Distro = "SUSE"
+elseif string.match(zx, ".+Red Hat.+") then
+	Distro = "RHEL"
+elseif string.match(zx, ".+Fedora.+") then
+	Distro = "Fedora"
+elseif string.match(zx, ".+elementary.+") then
+	Distro = "elementary"
+elseif string.match(zx, ".+Void.+") then
+	Distro = "Void"
+end
+
+-- CPU
+zrp = io.open("/proc/cpuinfo", "r")
+zr = zrp:read("*a")
+CPU = string.match(zr, "model name%s-:(.-)\n")
+
+-- Kernel
+zyp = io.open("/proc/sys/kernel/osrelease", "r")
+zy = zyp:read()
+
+-- Memory
+zzp = io.open("/proc/meminfo", "r")
+zz = zzp:read("*a")
+TotF = string.match(zz, "MemTotal:%s-(%d+) kB") / 976.5625
+FreF = string.match(zz, "MemFree:%s-(%d+) kB") / 976.5625
+AvaF = string.match(zz, "MemAvailable:%s-(%d+) kB") / 976.5625
+BufF = string.match(zz, "Buffers:%s-(%d+) kB") / 976.5625
+CacF = string.match(zz, "Cached:%s-(%d+) kB") / 976.5625
+SlaF = string.match(zz, "Slab:%s-(%d+) kB") / 976.5625
+UseF = TotF - FreF - BufF - CacF - SlaF
+rAvaF = TotF - UseF
+pUseF = TotF - AvaF
+TotI = string.format("%.0f", TotF)
+FreI = string.format("%.0f", FreF)
+AvaI = string.format("%.0f", AvaF)
+BufI = string.format("%.0f", BufF)
+CacI = string.format("%.0f", CacF)
+SlaI = string.format("%.0f", SlaF)
+UseI = string.format("%.0f", UseF)
+rAvaI = string.format("%.0f", rAvaF)
+rUseI = string.format("%.0f", pUseF)
+
+print(string.format("\
+%s               +\
+%s               #\
+%s              ###\
+%s             #####\
+%s             ######\
+%s            ; #####;\
+%s           +##.#####\
+%s          +##########\
+%s         #############;\
+%s        ###############+      HWMODEL:%s %s\
+%s       #######   #######      KERNEL:%s  %s\
+%s     .######;     ;###;`.     DISTRO:%s  %s\
+%s    .#######;     ;#####.     SHELL:%s   %s\
+%s    #########.   .########`   DE:%s      %s\
+%s   ######'           '######  TERM:%s    %s\
+%s  ;####                 ####; CPU:%s     %s\
+%s  ##'                     '## RAM:%s     %s MB / %s MB\
+%s #'                         `#%s", clr_D, clr_D, clr_D, clr_D, clr_D, clr_D, clr_D, clr_D, clr_D, clr_D, clr_NC, MODEL, clr_D, clr_NC, zy, clr_D, clr_NC, Distro, clr_D, clr_NC, SHELL, clr_D, clr_NC, DE, clr_D, clr_NC, TERM, clr_D, clr_NC, CPU, clr_D, clr_NC,  UseI, TotI, clr_D, clr_NC))
