@@ -9,9 +9,24 @@ clr_D = "\27[38;5;33m"
 SHELL = os.getenv("SHELL")
 USER = os.getenv("USER")
 TERM = os.getenv("TERM")
-cmd = "ps -u" .. USER .. "-o comm --no-headers"
+cmd = "ps -u " .. USER .. " -o comm --no-headers"
+zqp = io.popen(cmd, "r")
+zq = zqp:read("*a")
 
-DE = "Feature coming soon"
+-- DE
+if string.match(zq, ".+ksmserver.+") then
+	DE = "KDE"
+elseif string.match(zq, ".+cinnamon-session.+") then
+	DE = "Cinnamon"
+elseif string.match(zq, ".+gnome-session.+") then
+	DE = "GNOME"
+elseif string.match(zq, ".+lxsession.+") then
+	DE = "LXDE"
+elseif string.match(zq, ".+mate-session.+") then
+	DE = "MATE"
+elseif string.match(zq, ".+xfce4-session.+") then
+	DE = "XFCE"
+end
 
 -- Model
 if io.open("/sys/devices/virtual/dmi/id/board_vendor", "r") then
@@ -53,7 +68,8 @@ end
 -- CPU
 zrp = io.open("/proc/cpuinfo", "r")
 zr = zrp:read("*a")
-CPU = string.match(zr, "model name%s-:(.-)\n")
+preCPU = string.match(zr, "model name%s-:(.-)\n")
+CPU = preCPU:gsub("[(R)+(TM)]", "")
 
 -- Kernel
 zyp = io.open("/proc/sys/kernel/osrelease", "r")
@@ -97,6 +113,6 @@ print(string.format("\
 %s    .#######;     ;#####.     SHELL:%s   %s\
 %s    #########.   .########`   DE:%s      %s\
 %s   ######'           '######  TERM:%s    %s\
-%s  ;####                 ####; CPU:%s     %s\
+%s  ;####                 ####; CPU:%s    %s\
 %s  ##'                     '## RAM:%s     %s MB / %s MB\
-%s #'                         `#%s", clr_D, clr_D, clr_D, clr_D, clr_D, clr_D, clr_D, clr_D, clr_D, clr_D, clr_NC, MODEL, clr_D, clr_NC, zy, clr_D, clr_NC, Distro, clr_D, clr_NC, SHELL, clr_D, clr_NC, DE, clr_D, clr_NC, TERM, clr_D, clr_NC, CPU, clr_D, clr_NC,  UseI, TotI, clr_D, clr_NC))
+%s #'                         `#%s", clr_D, clr_D, clr_D, clr_D, clr_D, clr_D, clr_D, clr_D, clr_D, clr_D, clr_NC, MODEL, clr_D, clr_NC, zy, clr_D, clr_NC, Distro, clr_D, clr_NC, SHELL, clr_D, clr_NC, DE, clr_D, clr_NC, TERM, clr_D, clr_NC, CPU, clr_D, clr_NC, UseI, TotI, clr_D, clr_NC))
